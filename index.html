@@ -160,10 +160,45 @@ function analyze(){
   document.getElementById("reasons").innerHTML =
     found.length ? found.map(w=>`<li>⚠ Trigger word: ${w}</li>`).join("") :
     "<li>✔ No major red flags detected</li>";
+// 🔥 Save to Firestore
+db.collection("searchHistory").add({
+  text: text,
+  score: score,
+  flags: found,
+  breakdown: {
+    source: s1,
+    consistency: s2,
+    verification: s3
+  },
+  status: fake ? "Use Caution" : "Safe to Share",
+  createdAt: firebase.firestore.FieldValue.serverTimestamp()
+});
 
   window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"});
 }
 </script>
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics-compat.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCoPzRMQQR4Q-5qMNKbR5L78vo9OjUHQTs",
+    authDomain: "crisis-lens.firebaseapp.com",
+    projectId: "crisis-lens",
+    storageBucket: "crisis-lens.firebasestorage.app",
+    messagingSenderId: "597764507396",
+    appId: "1:597764507396:web:f911f0a2fc01178d433251",
+    measurementId: "G-6SYENK3EN1"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  firebase.analytics();
+
+  const db = firebase.firestore();
+
+
 
 </body>
 </html>
