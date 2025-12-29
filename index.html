@@ -1,180 +1,167 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>CrisisLens – Verify Before You Share</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CrisisLens – Verify Before You Share</title>
 
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            dark: "#0a192f",
-            card: "#112240",
-            accent: "#fbbf24",
-            danger: "#ef4444",
-            muted: "#94a3b8"
-          },
-          fontFamily: {
-            inter: ["Inter", "sans-serif"]
-          }
-        }
-      }
-    }
-  </script>
+<style>
+body{
+  margin:0;
+  font-family:Inter,sans-serif;
+  background:#f6f9fc;
+  color:#0f172a;
+}
+header{
+  background:#fff;
+  border-bottom:1px solid #e5e7eb;
+  padding:16px 40px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.logo{font-weight:800;font-size:20px}
+.logo span{color:#2563eb}
+nav a{
+  margin-left:18px;
+  text-decoration:none;
+  font-weight:600;
+  color:#334155;
+}
+.btn{
+  background:#2563eb;
+  color:white;
+  padding:10px 18px;
+  border-radius:10px;
+  border:none;
+  cursor:pointer;
+  font-weight:600;
+}
+.hero{
+  text-align:center;
+  padding:80px 20px 30px;
+}
+.hero h1{font-size:56px;font-weight:800}
+.hero h1 span{color:#2563eb}
+.hero p{color:#475569;font-size:18px}
+
+.card{
+  background:white;
+  max-width:850px;
+  margin:40px auto;
+  padding:30px;
+  border-radius:16px;
+  box-shadow:0 10px 30px rgba(0,0,0,.06);
+}
+textarea{
+  width:100%;
+  height:150px;
+  padding:16px;
+  border-radius:12px;
+  border:1px solid #cbd5e1;
+  font-size:16px;
+  font-family: sans-serif;
+}
+.center{text-align:center;margin-top:20px}
+
+#result{
+  display:none;
+  margin-top:30px;
+  border-top:1px solid #e5e7eb;
+  padding-top:20px;
+}
+.bar{
+  height:10px;
+  border-radius:10px;
+  background:#e5e7eb;
+  overflow:hidden;
+}
+.fill{
+  height:100%;
+  background:#2563eb;
+}
+.safe{color:#16a34a}
+.warn{color:#dc2626}
+</style>
 </head>
 
-<body class="bg-dark text-white font-inter min-h-screen">
+<body>
 
-<header class="border-b border-white/10 p-4">
-  <div class="max-w-6xl mx-auto flex justify-between items-center">
-    <h1 class="text-xl font-bold">
-      Crisis<span class="text-accent">Lens</span>
-    </h1>
-    <span class="text-sm text-muted">Verify Before You Share</span>
-  </div>
+<header>
+  <div class="logo">🛡️ Crisis<span>Lens</span></div>
+  <nav>
+    <a href="#">Home</a>
+    <a href="#">How It Works</a>
+    <a href="#">Analyze News</a>
+    <a href="#">About</a>
+  </nav>
 </header>
 
-<main class="max-w-4xl mx-auto px-4 py-12">
+<section class="hero">
+  <h1>Stop Misinformation<br><span>During Crisis</span></h1>
+  <p>AI-powered credibility check for war, emergencies & disasters</p>
+</section>
 
-  <section class="text-center mb-12">
-    <h2 class="text-4xl font-bold mb-3">
-      Verify News <span class="text-accent">Before</span> You Share
-    </h2>
-    <p class="text-muted text-lg">
-      Instant credibility check during crisis & emergencies
-    </p>
-  </section>
-
-  <section class="bg-card rounded-xl p-8 shadow-lg mb-12">
-    <h3 class="text-xl font-semibold mb-2">Check News Credibility</h3>
-    <p class="text-muted mb-4">Paste breaking news, WhatsApp forward, or link</p>
-
-    <textarea
-      id="newsInput"
-      rows="5"
-      placeholder="Paste news text or link here..."
-      class="w-full p-4 rounded-lg bg-dark border border-white/10 focus:outline-none focus:border-accent mb-6"
-    ></textarea>
-
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 text-sm">
-      <div class="bg-dark p-3 rounded-lg">✅ Source Check</div>
-      
-      <div class="bg-dark p-3 rounded-lg">⏱️ Context Check</div>
-    </div>
-
-    <div class="text-center text-muted text-sm mb-6">
-      Paste → Analyze Rules → Score → Recommendation
-    </div>
-
-    <div class="text-center">
-      <button onclick="analyze()"
-        class="bg-accent text-dark font-bold px-8 py-3 rounded-lg hover:scale-105 transition">
-        Analyze News
-      </button>
-    </div>
-  </section>
+<section class="card">
+  <textarea id="newsInput" placeholder="Paste news text or headline here..."></textarea>
+  <div class="center">
+    <button class="btn" onclick="analyze()">Check Credibility</button>
+  </div>
 
   <!-- RESULT -->
-  <section id="result" class="hidden bg-card rounded-xl p-8 shadow-lg">
-    <div class="flex justify-between items-center mb-6">
-      <h3 class="text-xl font-semibold">Credibility Result</h3>
-      <span id="score" class="text-3xl font-bold">--</span>
-    </div>
+  <div id="result">
+    <h3>Credibility Result</h3>
+    <h2 id="finalScore">--%</h2>
+    <p id="statusText"></p>
 
-    <div class="space-y-4 mb-6">
-      <div>
-        <div class="flex justify-between text-sm mb-1">
-          <span>Source Reliability</span><span id="s1">--</span>
-        </div>
-        <div class="h-2 bg-dark rounded">
-          <div id="b1" class="h-2 rounded"></div>
-        </div>
-      </div>
+    <p>Source Reliability</p>
+    <div class="bar"><div id="b1" class="fill"></div></div>
 
-      <div>
-        <div class="flex justify-between text-sm mb-1">
-          <span>Content Consistency</span><span id="s2">--</span>
-        </div>
-        <div class="h-2 bg-dark rounded">
-          <div id="b2" class="h-2 rounded"></div>
-        </div>
-      </div>
+    <p>Content Consistency</p>
+    <div class="bar"><div id="b2" class="fill"></div></div>
 
-      <div>
-        <div class="flex justify-between text-sm mb-1">
-          <span>Cross Verification</span><span id="s3">--</span>
-        </div>
-        <div class="h-2 bg-dark rounded">
-          <div id="b3" class="h-2 rounded"></div>
-        </div>
-      </div>
-    </div>
+    <p>Cross Verification</p>
+    <div class="bar"><div id="b3" class="fill"></div></div>
 
-    <div id="statusBox" class="p-4 rounded-lg">
-      <p id="statusText" class="font-semibold mb-2"></p>
-      <ul id="reasons" class="text-sm text-muted space-y-1"></ul>
-    </div>
-  </section>
-
-</main>
+    <ul id="reasons"></ul>
+  </div>
+</section>
 
 <script>
-function analyze() {
-  const text = document.getElementById("newsInput").value.toLowerCase();
-  if (!text) return alert("Paste some news first");
+function analyze(){
+  const text = document.getElementById("newsInput").value.toLowerCase().trim();
+  if(!text){ alert("Paste some news first"); return; }
 
-  const redFlags = [
-    "breaking",
-    "share immediately",
-    "secret",
-    "lockdown",
-    "internet shutdown",
-    "government insiders",
-    "urgent"
+  const redFlags=[
+    "breaking","urgent","share immediately","secret",
+    "lockdown","internet shutdown","government insiders"
   ];
 
-  let hits = redFlags.filter(w => text.includes(w));
+  const found = redFlags.filter(w=>text.includes(w));
+  const fake = found.length >= 2;
 
-  const fake = hits.length >= 2;
+  let score = fake ? 35 : 85;
+  let s1 = fake ? 40 : 90;
+  let s2 = fake ? 30 : 85;
+  let s3 = fake ? 35 : 80;
 
-  document.getElementById("result").classList.remove("hidden");
+  document.getElementById("result").style.display="block";
+  document.getElementById("finalScore").innerText = score + "%";
 
-  if (fake) {
-    setResult(35, 40, 30, 35, "⚠️ Use Caution", hits, "danger");
-  } else {
-    setResult(85, 90, 85, 80, "✅ Safe to Share", [], "accent");
-  }
+  document.getElementById("statusText").innerHTML =
+    fake ? "<b class='warn'>⚠ Use Caution</b>" : "<b class='safe'>✔ Safe to Share</b>";
 
-  window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
-}
+  document.getElementById("b1").style.width = s1+"%";
+  document.getElementById("b2").style.width = s2+"%";
+  document.getElementById("b3").style.width = s3+"%";
 
-function setResult(total, s1, s2, s3, status, flags, color) {
-  document.getElementById("score").innerText = total + "%";
-  document.getElementById("score").className = `text-3xl font-bold text-${color}`;
+  document.getElementById("reasons").innerHTML =
+    found.length ? found.map(w=>`<li>⚠ Trigger word: ${w}</li>`).join("") :
+    "<li>✔ No major red flags detected</li>";
 
-  setBar("b1", "s1", s1, color);
-  setBar("b2", "s2", s2, color);
-  setBar("b3", "s3", s3, color);
-
-  document.getElementById("statusText").innerText = "Status: " + status;
-  document.getElementById("statusBox").className = `p-4 rounded-lg bg-${color}/10`;
-
-  const list = document.getElementById("reasons");
-  list.innerHTML = flags.length
-    ? flags.map(f => `<li>⚠️ Trigger word: "${f}"</li>`).join("")
-    : "<li>✔ No major red flags detected</li>";
-}
-
-function setBar(bar, label, value, color) {
-  document.getElementById(label).innerText = value + "%";
-  const el = document.getElementById(bar);
-  el.style.width = value + "%";
-  el.className = `h-2 rounded bg-${color}`;
+  window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"});
 }
 </script>
 
