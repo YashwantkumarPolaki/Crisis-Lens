@@ -45,7 +45,7 @@ body {
   color:#fff;
 }
 
-/* SECTIONS – reduced spacing */
+/* SECTIONS */
 section{ padding:70px 20px; }
 .hero{text-align:center;}
 .hero h1{font-size:56px;font-weight:800;}
@@ -86,15 +86,32 @@ textarea{
   height:10px;
   border-radius:10px;
   background:#e5e7eb;
+  overflow:hidden;
 }
-.fill{height:100%;background:#2563eb}
+.fill{
+  height:100%;
+  background:#2563eb;
+  width:0;
+  transition:width .8s ease;
+}
+
+/* SOURCES */
+.source{
+  padding:10px 0;
+  border-bottom:1px solid #e5e7eb;
+}
+.source a{
+  font-weight:600;
+  color:#2563eb;
+  text-decoration:none;
+}
 
 /* INFO */
 .info{max-width:900px;margin:auto}
 .info h2{font-size:36px;margin-bottom:20px}
 .info p,.info li{font-size:18px;color:#475569;line-height:1.7}
 
-/* ✨ Elegant Divider – FIXED spacing */
+/* DIVIDER */
 .section-divider{
   max-width:900px;
   margin:35px auto;
@@ -116,7 +133,7 @@ textarea{
   font-weight:600;
 }
 
-/* 📦 About Card – pulled up */
+/* ABOUT */
 .about-card{
   max-width:900px;
   margin:30px auto;
@@ -125,15 +142,6 @@ textarea{
   padding:45px 55px;
   box-shadow:0 20px 45px rgba(0,0,0,0.08);
   border:1px solid #e5e7eb;
-}
-.about-card h2{
-  font-size:38px;
-  margin-bottom:20px;
-}
-.about-card p{
-  font-size:18px;
-  color:#475569;
-  line-height:1.8;
 }
 </style>
 </head>
@@ -154,7 +162,7 @@ textarea{
 <!-- HOME -->
 <section id="home" class="hero">
   <h1>Stop Misinformation<br><span>During Crisis</span></h1>
-  <p>AI-powered credibility check for war, emergencies & disasters</p>
+  <p>Real-time credibility check using live Google sources</p>
 </section>
 
 <!-- ANALYZE -->
@@ -167,8 +175,11 @@ textarea{
 
     <div id="result">
       <h3>Credibility Result</h3>
+      <p><b>NLP Semantic Similarity:</b> <span id="nlpScore"></span>%</p>
+
       <h2 id="finalScore">--%</h2>
       <p id="statusText"></p>
+      <p><b>Verified at:</b> <span id="time"></span></p>
 
       <p>Source Reliability</p>
       <div class="bar"><div id="b1" class="fill"></div></div>
@@ -178,21 +189,24 @@ textarea{
 
       <p>Cross Verification</p>
       <div class="bar"><div id="b3" class="fill"></div></div>
+
+      <h4>Live Verified Sources</h4>
+      <div id="sources"></div>
     </div>
   </div>
 </section>
 
 <div class="section-divider"><span>PROCESS</span></div>
 
-<!-- HOW IT WORKS -->
+<!-- HOW -->
 <section id="how">
   <div class="info">
     <h2>How CrisisLens Works</h2>
     <ul>
-      <li>Fast linguistic analysis using NLP signals</li>
-      <li>Panic & misinformation pattern detection</li>
-      <li>Consistency and structure scoring</li>
-      <li>Credibility indicators instead of blind verdict</li>
+      <li>Live Google search using Custom Search API</li>
+      <li>Multiple-source cross verification</li>
+      <li>Trusted-domain weighting</li>
+      <li>Transparent credibility indicators</li>
     </ul>
   </div>
 </section>
@@ -204,59 +218,76 @@ textarea{
   <div class="about-card">
     <h2>About CrisisLens</h2>
     <p>
-      CrisisLens is designed to slow the spread of panic and misinformation
-      during emergencies, wars, and disasters.
+      CrisisLens verifies breaking news during emergencies by performing
+      real-time Google searches and cross-checking multiple trusted sources.
       <br><br>
-      Instead of providing blind yes/no answers, it delivers fast credibility
-      indicators using linguistic risk signals—helping users pause, verify,
-      and share responsibly.
+      It provides credibility indicators instead of blind yes/no answers.
     </p>
   </div>
 </section>
 
 <!-- SCRIPT -->
 <script>
-function analyze() {
+async function analyze() {
   const text = document.getElementById("newsInput").value.trim();
-  if (!text) return alert("Paste news first");
-
-  let score = 80;
-  const lower = text.toLowerCase();
-
-  const panicWords = [
-    "breaking","share urgently","forward","whatsapp",
-    "withdraw cash","internet shutdown","secret operation","government hiding"
-  ];
-
-  panicWords.forEach(word => {
-    if (lower.includes(word)) score -= 8;
-  });
-
-  if (text.length < 100) score -= 10;
-
-  score = Math.max(0, Math.min(100, score));
-
-  document.getElementById("result").style.display = "block";
-  document.getElementById("finalScore").innerText = score + "%";
-
-  const status = document.getElementById("statusText");
-  status.innerText = "";
-  status.style.color = "";
-
-  if (score >= 75) {
-    status.innerText = "✔ Looks Reliable (Fast Check)";
-    status.style.color = "#16a34a";
-  } else if (score >= 40) {
-    status.innerText = "⚠ Needs Verification";
-    status.style.color = "#f59e0b";
-  } else {
-    status.innerText = "✖ Likely Misleading";
-    status.style.color = "#dc2626";
+  if (!text) {
+    alert("Paste news first");
+    return;
   }
 
-  document.getElementById("b1").style.width = score + "%";
-  document.getElementById("b2").style.width = Math.max(score - 10, 0) + "%";
-  document.getElementById("b3").style.width = Math.max(score - 20, 0) + "%";
+  document.getElementById("result").style.display = "block";
+  document.getElementById("finalScore").innerText = "Checking…";
+  document.getElementById("statusText").innerText = "";
+  document.getElementById("time").innerText = "";
+  document.getElementById("nlpScore").innerText = "";
+  document.getElementById("sources").innerHTML = "";
+
+  let res;
+  try {
+    res = await fetch("/api/verify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text })
+    });
+  } catch (err) {
+    document.getElementById("finalScore").innerText = "Network Error";
+    return;
+  }
+
+  let data;
+  try {
+    data = await res.json();
+  } catch (err) {
+    document.getElementById("finalScore").innerText = "Invalid API response";
+    return;
+  }
+
+  if (data.error) {
+    document.getElementById("finalScore").innerText = "Error";
+    document.getElementById("statusText").innerText = data.error;
+    return;
+  }
+
+  /* ✅ UPDATE UI (ONCE, CLEANLY) */
+  document.getElementById("finalScore").innerText = data.score + "%";
+  document.getElementById("statusText").innerText = data.label;
+  document.getElementById("time").innerText = data.verifiedAt;
+  document.getElementById("nlpScore").innerText = data.nlpSimilarity;
+
+  document.getElementById("b1").style.width = data.score + "%";
+  document.getElementById("b2").style.width = Math.max(data.score - 10, 0) + "%";
+  document.getElementById("b3").style.width = Math.max(data.score - 20, 0) + "%";
+
+  if (Array.isArray(data.sources)) {
+    data.sources.forEach(s => {
+      document.getElementById("sources").innerHTML += `
+        <div class="source">
+          <a href="${s.link}" target="_blank">${s.title}</a>
+          <p>${s.snippet}</p>
+        </div>
+      `;
+    });
+  }
 }
 </script>
 
