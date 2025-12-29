@@ -1,40 +1,39 @@
-export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Only POST allowed" });
-  }
+const articles = data.articles || [];
 
-  const { text } = req.body;
-  if (!text || text.length < 10) {
-    return res.status(400).json({ error: "Invalid input" });
-  }
+const uniqueSources = new Set(
+  articles.map(a => a.source?.name).filter(Boolean)
+);
 
-  try {
-    const API_KEY = process.env.GNEWS_API_KEY;
-    const query = encodeURIComponent(text.slice(0, 120));
+let score = 0;
+let status = "";
+let breakdown = {};
 
-    const url = `https://gnews.io/api/v4/search?q=${query}&lang=en&max=5&apikey=${API_KEY}`;
-    const response = await fetch(url);
-    const data = await response.json();
-
-    let score = 25;
-    let sources = [];
-
-    if (data.articles && data.articles.length > 0) {
-      score = Math.min(90, 40 + data.articles.length * 10);
-      sources = data.articles.map(a => ({
-        title: a.title,
-        source: a.source.name,
-        url: a.url
-      }));
-    }
-
-    res.status(200).json({
-      credibilityScore: score,
-      verdict: score >= 60 ? "Likely True" : "Needs Verification",
-      matchedArticles: sources
-    });
-
-  } catch (err) {
-    res.status(500).json({ error: "Fact check failed" });
-  }
+if (articles.length === 0) {
+  score = 20;
+  status = "Likely Fake";
+} else if (articles.length <= 2) {
+  score = 45;
+  status = "Use Caution";
+} else if (articles.length <= 5) {
+  score = 75;
+  status = "Likely True";
+} else {
+  score = 90;
+  status = "Highly Credible";
 }
+
+breakdown = {
+  sourceReliability: Math.min(uniqueSources.size * 20, 100),
+  consistency: Math.min(articles.length * 15, 100),
+  verification: articles.length > 0 ? 80 : 20
+};
+
+return res.status(200).json({
+  success: true,
+  score,
+  status,
+  articleCount: articles.length,
+  sources: Array.from(uniqueSources),
+  breakdown,
+  articles: articles.slice(0, 5)
+});
