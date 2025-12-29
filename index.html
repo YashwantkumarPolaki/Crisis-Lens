@@ -8,10 +8,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
 <style>
-html{
-  scroll-behavior: smooth;
-}
-body{
+html { scroll-behavior: smooth; }
+body {
   margin:0;
   font-family:Inter,sans-serif;
   background:#f6f9fc;
@@ -31,10 +29,7 @@ body{
   justify-content:space-between;
   align-items:center;
 }
-.logo{
-  font-size:22px;
-  font-weight:800;
-}
+.logo{font-size:22px;font-weight:800}
 .logo span{color:#2563eb}
 
 .nav-links a{
@@ -44,35 +39,24 @@ body{
   color:#334155;
   padding:8px 14px;
   border-radius:10px;
-  transition:.25s;
 }
 .nav-links a:hover{
   background:#2563eb;
   color:#fff;
 }
 
-/* SECTIONS */
-section{
-  padding:100px 20px;
-}
-.hero{
-  text-align:center;
-}
-.hero h1{
-  font-size:56px;
-  font-weight:800;
-}
+/* SECTIONS – reduced spacing */
+section{ padding:70px 20px; }
+.hero{text-align:center;}
+.hero h1{font-size:56px;font-weight:800;}
 .hero h1 span{color:#2563eb}
-.hero p{
-  font-size:18px;
-  color:#475569;
-}
+.hero p{font-size:18px;color:#475569}
 
 /* CARD */
 .card{
   background:#fff;
   max-width:850px;
-  margin:40px auto;
+  margin:30px auto;
   padding:30px;
   border-radius:18px;
   box-shadow:0 15px 35px rgba(0,0,0,.08);
@@ -104,22 +88,52 @@ textarea{
   background:#e5e7eb;
 }
 .fill{height:100%;background:#2563eb}
-.safe{color:#16a34a}
-.warn{color:#dc2626}
 
-/* INFO SECTIONS */
-.info{
+/* INFO */
+.info{max-width:900px;margin:auto}
+.info h2{font-size:36px;margin-bottom:20px}
+.info p,.info li{font-size:18px;color:#475569;line-height:1.7}
+
+/* ✨ Elegant Divider – FIXED spacing */
+.section-divider{
   max-width:900px;
-  margin:auto;
+  margin:35px auto;
+  display:flex;
+  align-items:center;
+  gap:14px;
 }
-.info h2{
-  font-size:36px;
+.section-divider::before,
+.section-divider::after{
+  content:"";
+  flex:1;
+  height:1px;
+  background:linear-gradient(to right, transparent, #cbd5e1, transparent);
+}
+.section-divider span{
+  font-size:12px;
+  letter-spacing:1px;
+  color:#64748b;
+  font-weight:600;
+}
+
+/* 📦 About Card – pulled up */
+.about-card{
+  max-width:900px;
+  margin:30px auto;
+  background:linear-gradient(180deg,#ffffff,#f8fafc);
+  border-radius:20px;
+  padding:45px 55px;
+  box-shadow:0 20px 45px rgba(0,0,0,0.08);
+  border:1px solid #e5e7eb;
+}
+.about-card h2{
+  font-size:38px;
   margin-bottom:20px;
 }
-.info p, .info li{
+.about-card p{
   font-size:18px;
   color:#475569;
-  line-height:1.7;
+  line-height:1.8;
 }
 </style>
 </head>
@@ -168,44 +182,81 @@ textarea{
   </div>
 </section>
 
+<div class="section-divider"><span>PROCESS</span></div>
+
 <!-- HOW IT WORKS -->
 <section id="how">
   <div class="info">
     <h2>How CrisisLens Works</h2>
     <ul>
-      <li>Real-time news fetched using verified APIs</li>
-      <li>Cross-source triangulation to reduce bias</li>
-      <li>Metadata & timestamp validation</li>
-      <li>AI-assisted credibility scoring</li>
-      <li>Transparent explanation instead of blind verdict</li>
+      <li>Fast linguistic analysis using NLP signals</li>
+      <li>Panic & misinformation pattern detection</li>
+      <li>Consistency and structure scoring</li>
+      <li>Credibility indicators instead of blind verdict</li>
     </ul>
   </div>
 </section>
 
+<div class="section-divider"><span>DETAILS</span></div>
+
 <!-- ABOUT -->
 <section id="about">
-  <div class="info">
+  <div class="about-card">
     <h2>About CrisisLens</h2>
     <p>
-      CrisisLens is built to prevent panic and misinformation during
-      emergencies, wars, and disasters.  
-      It empowers users to verify before sharing.
+      CrisisLens is designed to slow the spread of panic and misinformation
+      during emergencies, wars, and disasters.
+      <br><br>
+      Instead of providing blind yes/no answers, it delivers fast credibility
+      indicators using linguistic risk signals—helping users pause, verify,
+      and share responsibly.
     </p>
   </div>
 </section>
 
+<!-- SCRIPT -->
 <script>
-function analyze(){
-  const text=document.getElementById("newsInput").value.trim();
-  if(!text){alert("Paste news first");return;}
+function analyze() {
+  const text = document.getElementById("newsInput").value.trim();
+  if (!text) return alert("Paste news first");
 
-  const score=78;
-  document.getElementById("result").style.display="block";
-  document.getElementById("finalScore").innerText=score+"%";
-  document.getElementById("statusText").innerHTML="<b class='safe'>✔ Appears Reliable</b>";
-  document.getElementById("b1").style.width="80%";
-  document.getElementById("b2").style.width="75%";
-  document.getElementById("b3").style.width="70%";
+  let score = 80;
+  const lower = text.toLowerCase();
+
+  const panicWords = [
+    "breaking","share urgently","forward","whatsapp",
+    "withdraw cash","internet shutdown","secret operation","government hiding"
+  ];
+
+  panicWords.forEach(word => {
+    if (lower.includes(word)) score -= 8;
+  });
+
+  if (text.length < 100) score -= 10;
+
+  score = Math.max(0, Math.min(100, score));
+
+  document.getElementById("result").style.display = "block";
+  document.getElementById("finalScore").innerText = score + "%";
+
+  const status = document.getElementById("statusText");
+  status.innerText = "";
+  status.style.color = "";
+
+  if (score >= 75) {
+    status.innerText = "✔ Looks Reliable (Fast Check)";
+    status.style.color = "#16a34a";
+  } else if (score >= 40) {
+    status.innerText = "⚠ Needs Verification";
+    status.style.color = "#f59e0b";
+  } else {
+    status.innerText = "✖ Likely Misleading";
+    status.style.color = "#dc2626";
+  }
+
+  document.getElementById("b1").style.width = score + "%";
+  document.getElementById("b2").style.width = Math.max(score - 10, 0) + "%";
+  document.getElementById("b3").style.width = Math.max(score - 20, 0) + "%";
 }
 </script>
 
